@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5 md-5">
+    <h1 type="text" th:text="'Edit <' + ${user.getFirstname()} + '> profile'"></h1>
+    <div>
+        <form method="post" th:object="${user}">
+            <label for="uname">Last Name</label>
+            <input type="text" th:value="${user.getLastname()}" name="lastname" id="uname"  class="form-control">
+            <br>
+            <label for="pass">Password</label>
+            <input type="text" th:value="${user.getPassword()}" name="password" id="pass" class="form-control">
+            <br>
+            <label for="email">Email address</label>
+            <input type="text" th:value="${user.getEmail()}" name="email" id="email" class="form-control">
+            <br>
+            <button type="submit" class="btn btn-success">Update profile</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

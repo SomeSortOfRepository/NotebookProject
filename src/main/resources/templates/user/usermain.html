@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>all users</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+
+<div class="container mt-5">
+    <h1>All users</h1>
+    <div th:each="element : ${users}" class="alert alert-info mt-2">
+        <hr>
+        <label for="id">Id:</label>
+        <h4 th:text="${element.getId()}" id="id" style="display:inline"></h4>
+        <br>
+        <label for="fname">First Name:</label>
+        <h4 th:text="${element.getFirstname()}" id="fname" style="display:inline"></h4>
+        <br>
+        <label for="role">Role:</label>
+        <h4 th:text="${element.getRole()}" id="role" style="display:inline"></h4>
+        <br>
+        <label for="status">Status:</label>
+        <h4 th:text="${element.getStatus()}" id="status" style="display:inline"></h4>
+        <br>
+        <a th:href="'/users/' + ${element.getId()} + '/edit'" class="btn btn-success">edit</a>
+        <a th:href="'/users/' + ${element.getId()} + '/remove'" class="btn btn-danger">remove</a>
+        <hr>
+    </div>
+</div>
+
+
+</body>
+</html>

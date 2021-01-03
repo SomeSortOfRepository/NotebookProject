@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>all notes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+
+<div class="container mt-5">
+    <h1>Your notes </h1>
+    <div th:each="element : ${list}" class="alert alert-info mt-2">
+        <hr>
+            <h3 th:text="${element.getTitle()}"></h3>
+            <h5 th:text="${element.getDateOfCreation()}"> ></h5>
+            <h4 th:text="${element.getContent()}"></h4>
+            <a th:href="'/notebook/' + ${element.getId()} + '/edit'" class="btn btn-sm btn-success">edit</a>
+            <a th:href="'/notebook/' + ${element.getId()} + '/remove'" class="btn btn-sm btn-danger">remove</a>
+        <hr>
+    </div>
+    <a href="/notebook/add" class="btn btn-success">add new note</a>
+</div>
+
+
+</body>
+</html>
