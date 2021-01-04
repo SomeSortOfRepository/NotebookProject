@@ -8,14 +8,15 @@
 <body>
 <div class="container mt-5 mb-5">
     <h1>Registration</h1>
+    <h1 type="text" th:value="${warning}" class="alert alert-danger"></h1>
     <form action="/users/registration" method="post">
-        <input type="text" name="First Name" placeholder="Enter your First Name" class="form-control">
+        <input type="text" name="firstname" placeholder="Enter your First Name" class="form-control">
         <br>
-        <input type="text" name="Last Name" placeholder="Enter your Last Name" class="form-control">
+        <input type="text" name="lastname" placeholder="Enter your Last Name" class="form-control">
         <br>
         <input type="text" name="password" placeholder="Enter your password" class="form-control">
         <br>
-        <input type="text" name="Email" placeholder="Enter your email" class="form-control">
+        <input type="text" name="email" placeholder="Enter your email" class="form-control">
         <br>
         <button type="submit" class="btn btn-success">confirm registration</button>
     </form>

@@ -40,24 +40,25 @@ public class UserController {
 
     @GetMapping("/registration")
     public String addUser(Model model) {
-        return "redirect:/users/add";
+        return "/user/createuser";
     }
 
     @PostMapping("/registration")
     public String addNewUser(@RequestParam String firstname,
                              @RequestParam String lastname,
-                             @RequestParam String pass,
+                             @RequestParam String password,
                              @RequestParam String email,  Model model) {
+        String warning="";
         if(userRepo.existsByFirstname(firstname)) {
-            String warning="user with such name already exists";
+            warning="ERROR: user with such name already exists, first name must be unique";
             model.addAttribute("warning", warning);
-            return "redirect:/users/add";
+            return "redirect:/users/registration";
         }
-        User user=new User(firstname, lastname, pass, email);
+        User user=new User(firstname, lastname, password, email);
         user.setRole(Role.USER);
         user.setStatus(Status.ACTIVE);
         userRepo.save(user);
-        return "/user/createuser";
+        return "redirect:/users";
     }
 
     @GetMapping("{id}/edit")
@@ -72,17 +73,15 @@ public class UserController {
 
     @PostMapping("{id}/edit")
     public String postEditedUser(@PathVariable(value = "id") Long id,
-                                 @RequestParam String firstname,
                                  @RequestParam String lastname,
-                                 @RequestParam String pass,
+                                 @RequestParam String password,
                                  @RequestParam String email, Model model) {
         if(!userRepo.existsById(id)) {
             return "redirect:/users/main";
         }
         User user=userRepo.findById(id).orElseThrow();
-        user.setFirstname(firstname);
         user.setLastname(lastname);
-        user.setPassword(pass);
+        user.setPassword(password);
         user.setEmail(email);
         userRepo.save(user);
         return "redirect:/users";
