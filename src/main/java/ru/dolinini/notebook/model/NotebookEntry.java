@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 
 @Entity
@@ -50,6 +51,22 @@ public class NotebookEntry {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NotebookEntry that = (NotebookEntry) o;
+        return id.equals(that.id) &&
+                title.equals(that.title) &&
+                Objects.equals(content, that.content) &&
+                dateOfCreation.equals(that.dateOfCreation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, content, dateOfCreation);
     }
 
     public String getContent() {

@@ -32,6 +32,12 @@ public class NoteController {
         model.addAttribute("list", list);
         return "/notebook/main";
     }
+    @GetMapping("/notes/{id}")
+    public String findAllUserNotes (@PathVariable(value="id") Long id, Model model) {
+        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(id);
+        model.addAttribute("list", list);
+        return "/notebook/main";
+    }
 
     @GetMapping("/add")
     public String addNote () {
