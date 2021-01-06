@@ -1,5 +1,7 @@
 package ru.dolinini.notebook.controllers;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ public class AuthorizationController {
 
     public final UserRepo userRepo;
 
+
     public AuthorizationController(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
@@ -30,26 +33,29 @@ public class AuthorizationController {
         return "/auth/success";
     }
 
-//    @GetMapping("/registration")
-//    public String addUser(Model model) {
-//        return "/user/createuser";
-//    }
-//
-//    @PostMapping("/registration")
-//    public String addNewUser(@RequestParam String firstname,
-//                             @RequestParam String lastname,
-//                             @RequestParam String password,
-//                             @RequestParam String email,  Model model) {
-//        String warning="";
-//        if(userRepo.existsByFirstname(firstname)) {
-//            warning="ERROR: user with such name already exists, first name must be unique";
-//            model.addAttribute("warning", warning);
-//            return "redirect:/users/registration";
-//        }
-//        User user=new User(firstname, lastname, password, email);
-//        user.setRole(Role.USER);
-//        user.setStatus(Status.ACTIVE);
-//        userRepo.save(user);
-//        return "redirect:/users";                            //TODO redirect to authenticated user notes
-//    }
+    @GetMapping("/registration")
+    public String addUser(Model model) {
+        return "/user/createuser";
+    }
+
+    @PostMapping("/registration")
+    public String addNewUser(@RequestParam String firstname,
+                             @RequestParam String lastname,
+                             @RequestParam String password,
+                             @RequestParam String email,  Model model) {
+
+        if(userRepo.existsByFirstname(firstname)) {
+            String warning="error";
+            model.addAttribute("warning", warning);
+            return "/user/createuser";
+        }
+        String pass=new BCryptPasswordEncoder(12).encode(password);
+        User user=new User(firstname, lastname, pass, email);
+        user.setRole(Role.USER);
+        user.setStatus(Status.ACTIVE);
+        userRepo.save(user);
+        String warning="success";
+        model.addAttribute("warning", warning);
+        return "/auth/login";
+    }
 }

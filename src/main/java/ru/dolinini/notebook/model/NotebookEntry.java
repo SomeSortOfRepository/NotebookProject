@@ -80,6 +80,9 @@ public class NotebookEntry {
     public Date getDateOfCreation() {
         return dateOfCreation;
     }
+    public String getDateOfCreationInMs() {
+        return String.valueOf(dateOfCreation.getTime());
+    }
 
     public void setDateOfCreation(Date dateOfCreation) {
         this.dateOfCreation = dateOfCreation;

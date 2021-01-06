@@ -1,6 +1,8 @@
 package ru.dolinini.notebook.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +11,7 @@ import ru.dolinini.notebook.model.NotebookEntry;
 import ru.dolinini.notebook.model.User;
 import ru.dolinini.notebook.repos.NotebookRepo;
 import ru.dolinini.notebook.repos.UserRepo;
+import ru.dolinini.notebook.security.SecurityUser;
 
 import java.util.Date;
 import java.util.List;
@@ -28,16 +31,18 @@ public class NoteController {
 
     @GetMapping("/notes")
     public String findAllNotes (Model model) {
-        Iterable<NotebookEntry>list=notebookRepo.findAll();
+        UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
+        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(user.getId());
         model.addAttribute("list", list);
         return "/notebook/main";
     }
-    @GetMapping("/notes/{id}")
-    public String findAllUserNotes (@PathVariable(value="id") Long id, Model model) {
-        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(id);
-        model.addAttribute("list", list);
-        return "/notebook/main";
-    }
+//    @GetMapping("/notes/{id}")
+//    public String findAllUserNotes (@PathVariable(value="id") Long id, Model model) {
+//        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(id);
+//        model.addAttribute("list", list);
+//        return "/notebook/main";
+//    }
 
     @GetMapping("/add")
     public String addNote () {
@@ -45,7 +50,10 @@ public class NoteController {
     }
     @PostMapping("/add")
     public String postNewNote (@RequestParam String title, @RequestParam String content, Model model) {
+        UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
         NotebookEntry newEntry=new NotebookEntry(title, content);
+        newEntry.setUser(user);
         notebookRepo.save(newEntry);
         return "redirect:/notebook/notes";
     }

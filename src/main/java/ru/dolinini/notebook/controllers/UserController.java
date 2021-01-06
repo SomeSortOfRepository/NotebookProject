@@ -1,6 +1,8 @@
 package ru.dolinini.notebook.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -74,14 +76,12 @@ public class UserController {
     @PostMapping("{id}/edit")
     public String postEditedUser(@PathVariable(value = "id") Long id,
                                  @RequestParam String lastname,
-                                 @RequestParam String password,
                                  @RequestParam String email, Model model) {
         if(!userRepo.existsById(id)) {
             return "redirect:/users/main";
         }
         User user=userRepo.findById(id).orElseThrow();
         user.setLastname(lastname);
-        user.setPassword(password);
         user.setEmail(email);
         userRepo.save(user);
         return "redirect:/users";
