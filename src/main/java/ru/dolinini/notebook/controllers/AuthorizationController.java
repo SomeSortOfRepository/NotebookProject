@@ -4,14 +4,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import ru.dolinini.notebook.model.User;
 import ru.dolinini.notebook.repos.UserRepo;
 import ru.dolinini.notebook.security.Role;
 import ru.dolinini.notebook.security.Status;
+
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/auth")
@@ -34,27 +34,26 @@ public class AuthorizationController {
     }
 
     @GetMapping("/registration")
-    public String addUser(Model model) {
+    public String addUser(@ModelAttribute("user") User user) {
         return "/user/createuser";
     }
 
     @PostMapping("/registration")
-    public String addNewUser(@RequestParam String firstname,
-                             @RequestParam String lastname,
-                             @RequestParam String password,
-                             @RequestParam String email,  Model model) {
-
-        if(userRepo.existsByFirstname(firstname)) {
-            String warning="error";
+    public String addNewUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, Model model) {
+        if(userRepo.existsByFirstname(user.getFirstname())) {
+            String warning="Error, user with such name already exists";
             model.addAttribute("warning", warning);
             return "/user/createuser";
         }
-        String pass=new BCryptPasswordEncoder(12).encode(password);
-        User user=new User(firstname, lastname, pass, email);
-        user.setRole(Role.USER);
-        user.setStatus(Status.ACTIVE);
-        userRepo.save(user);
-        String warning="success";
+        if (bindingResult.hasErrors()) {
+            return "/user/createuser";
+        }
+        String pass=new BCryptPasswordEncoder(12).encode(user.getPassword());
+        User newUser=new User(user.getFirstname(),user.getLastname(), pass, user.getEmail());
+        newUser.setRole(Role.USER);
+        newUser.setStatus(Status.ACTIVE);
+        userRepo.save(newUser);
+        String warning="Success, now you can login";
         model.addAttribute("warning", warning);
         return "/auth/login";
     }

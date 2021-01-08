@@ -33,8 +33,8 @@
                 <hr>
                     <h1 th:text="${element.getTitle()}" class="text-dark"></h1>
                     <h5 th:text="${element.getDateOfCreation()}" class="text-dark"></h5>
-                    <h3 th:text="${element.getContent()}" th:id="${element.getTitle()} + ${element.getId()}" class="collapse text-dark" ></h3>
-                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" th:data-target="'#' + ${element.getTitle()} + ${element.getId()}">details</button>
+                    <h3 th:text="${element.getContent()}" th:id="'id' + ${element.getId()}" class="collapse text-dark" ></h3>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" th:data-target="'#' + 'id' + ${element.getId()}">details</button>
                     <a th:href="'/notebook/' + ${element.getId()} + '/edit'" class="btn btn-sm btn-success">edit</a>
                     <a th:href="'/notebook/' + ${element.getId()} + '/remove'" class="btn btn-sm btn-danger">remove</a>
                 <hr>

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -22,6 +23,7 @@ import java.lang.reflect.Method;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     public final UserDetailsService userDetailsServiceimpl;
@@ -36,10 +38,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "/auth/registration").permitAll()
-                .antMatchers(HttpMethod.GET, "/notebook/**").hasAnyAuthority(Permission.READNOTES.getPermission(),Permission.READ.getPermission())
-                .antMatchers(HttpMethod.POST, "/notebook/**").hasAnyAuthority(Permission.WRITENOTES.getPermission(),Permission.WRITE.getPermission())
-                .antMatchers(HttpMethod.GET, "/**").hasAuthority(Permission.READ.getPermission())
-                .antMatchers(HttpMethod.POST, "/**").hasAuthority(Permission.WRITE.getPermission())
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

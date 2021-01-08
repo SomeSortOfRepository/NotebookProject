@@ -11,10 +11,12 @@
     <div class="container mt-5 md-5">
     <h1>Edit note</h1>
     <div>
-        <form method="post" th:object="${entry}">
+        <form th:method="post" th:object="${entry}">
             <input type="text" th:value="${entry.getTitle()}" name="title" class="form-control">
+            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="text-danger">Title Error</div>
             <br>
             <textarea name="content" th:text="${entry.getContent()}" class="form-control"/>
+            <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="text-danger">Content Error</div>
             <br>
             <button type="submit" class="btn btn-success">Update note</button>
         </form>

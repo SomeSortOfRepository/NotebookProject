@@ -10,10 +10,12 @@
 <body class="bg-light">
     <div class="container mt-5 mb-5">
         <h1>Add note</h1>
-        <form action="/notebook/add" method="post">
-            <input type="text" name="title" placeholder="Enter title" class="form-control">
+        <form th:action="@{/notebook/add}" th:method="post" th:object="${entry}">
+            <input type="text" name="title" th:field="*{title}" placeholder="Enter title" class="form-control"/>
+            <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="text-danger">Title Error</div>
             <br>
-            <textarea name="content" placeholder="Enter content" class="form-control"></textarea>
+            <textarea name="content" th:field="*{content}" placeholder="Enter content" class="form-control"></textarea>
+            <div th:if="${#fields.hasErrors('content')}" th:errors="*{content}" class="text-danger">Content Error</div>
             <br>
             <button type="submit" class="btn btn-success">Add note</button>
         </form>
