@@ -10,7 +10,7 @@
 <body class="bg-light">
 <div class="container mt-5 mb-5">
     <h1>Registration</h1>
-    <h4 th:if="${warning}" th:text="${warning}" ></h4>
+    <h4 th:if="${warning}" th:text="${warning}" class="text-danger"></h4>
     <form th:action="@{/auth/registration}" th:method="post" th:object="${user}">
         <input type="text" name="firstname" th:field="*{firstname}" placeholder="Enter your First Name" class="form-control">
         <div th:if="${#fields.hasErrors('firstname')}" th:errors="*{firstname}" class="text-danger">Firstname Error</div>

@@ -84,21 +84,26 @@ public class UserController {
         if(!userRepo.existsById(id)) {
             return "redirect:/users";
         }
+        if (bindingResult.hasErrors()) {
+            return "/user/edituser";
+        }
         User updatedUser=userRepo.findById(id).orElseThrow();
-        user.setFirstname(updatedUser.getFirstname());
-        if (bindingResult.hasFieldErrors("lastname")) {
+        if(userRepo.existsByFirstname(user.getFirstname()) & !updatedUser.getFirstname().equals(user.getFirstname())) {
+            String warning="Error, user with such name already exists";
+            model.addAttribute("warning", warning);
             return "/user/edituser";
         }
-        if (bindingResult.hasFieldErrors("email")) {
-            return "/user/edituser";
-        }
+        updatedUser.setFirstname(user.getFirstname());
         updatedUser.setLastname(user.getLastname());
+        if (!updatedUser.getPassword().equals(user.getPassword())) {
+            updatedUser.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        }
         updatedUser.setEmail(user.getEmail());
         userRepo.save(updatedUser);
         return "redirect:/users";
     }
 
-    @GetMapping("{id}/remove")
+    @PostMapping("{id}/remove")
     @PreAuthorize("hasAuthority('permission:write')")
     public String removeUser(@PathVariable(value = "id") Long id) {
         userRepo.deleteById(id);

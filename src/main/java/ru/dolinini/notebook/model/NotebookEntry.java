@@ -17,6 +17,7 @@ public class NotebookEntry {
     private Long id;
 
     @Column(name = "title")
+    @NotNull
     @NotEmpty(message = "Title can't be empty")
     @NotBlank(message = "Title can't contain only blank space")
     @Size(min = 1, max = 90, message = "Title size can be between 1 and 90 characters")

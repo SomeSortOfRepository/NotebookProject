@@ -41,12 +41,6 @@ public class NoteController {
         model.addAttribute("list", list);
         return "/notebook/main";
     }
-//    @GetMapping("/notes/{id}")
-//    public String findAllUserNotes (@PathVariable(value="id") Long id, Model model) {
-//        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(id);
-//        model.addAttribute("list", list);
-//        return "/notebook/main";
-//    }
 
     @GetMapping("/add")
     @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
@@ -116,11 +110,12 @@ public class NoteController {
         }
         updatedEntry.setDateOfCreation(new Date());
         notebookRepo.save(updatedEntry);
+
         return "redirect:/notebook/notes";
     }
 
 
-    @GetMapping("/{id}/remove")
+    @PostMapping("/{id}/remove")
     @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
     public String removeNoteById (@PathVariable(value="id") Long id) {
 
