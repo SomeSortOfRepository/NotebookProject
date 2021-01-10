@@ -1,10 +1,12 @@
 package ru.dolinini.notebook.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import ru.dolinini.notebook.model.NotebookEntry;
@@ -13,6 +15,7 @@ import ru.dolinini.notebook.repos.NotebookRepo;
 import ru.dolinini.notebook.repos.UserRepo;
 import ru.dolinini.notebook.security.SecurityUser;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class NoteController {
     }
 
     @GetMapping("/notes")
+    @PreAuthorize("hasAnyAuthority('permission:readnotes', 'permission:read', 'permission:write')")
     public String findAllNotes (Model model) {
         UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
@@ -37,31 +41,40 @@ public class NoteController {
         model.addAttribute("list", list);
         return "/notebook/main";
     }
-//    @GetMapping("/notes/{id}")
-//    public String findAllUserNotes (@PathVariable(value="id") Long id, Model model) {
-//        Iterable<NotebookEntry>list=notebookRepo.findAllByUserId(id);
-//        model.addAttribute("list", list);
-//        return "/notebook/main";
-//    }
 
     @GetMapping("/add")
-    public String addNote () {
+    @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
+    public String addNote (@ModelAttribute("entry") NotebookEntry entry) {
         return "/notebook/createnote";
     }
     @PostMapping("/add")
-    public String postNewNote (@RequestParam String title, @RequestParam String content, Model model) {
+    @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
+    public String postNewNote (@ModelAttribute("entry") @Valid NotebookEntry entry, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "/notebook/createnote";
+        }
         UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
-        NotebookEntry newEntry=new NotebookEntry(title, content);
-        newEntry.setUser(user);
-        notebookRepo.save(newEntry);
+        if(entry.getContent().isEmpty() || entry.getContent().isBlank()) {
+            entry.setContent("no content");
+        }
+        entry.setUser(user);
+        entry.setDateOfCreation(new Date());
+        notebookRepo.save(entry);
         return "redirect:/notebook/notes";
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
     public String editNote (@PathVariable(value="id") Long id, Model model) {
         if(!notebookRepo.existsById(id)) {
-            return "redirect:/notebook/main";
+            return "redirect:/notebook/notes";
+        }
+        UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
+
+        if (!user.getId().equals(notebookRepo.findById(id).get().getUser().getId())) {
+            return "redirect:/notebook/notes";
         }
         NotebookEntry entry=notebookRepo.findById(id).orElseThrow();
         model.addAttribute("entry", entry);
@@ -69,21 +82,54 @@ public class NoteController {
     }
 
     @PostMapping("/{id}/edit")
-    public String postEditedNote (@RequestParam String title, @RequestParam String content, @PathVariable(value="id") Long id, Model model) {
+    @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
+    public String postEditedNote (@ModelAttribute("entry") @Valid NotebookEntry entry, BindingResult bindingResult, @PathVariable(value="id") Long id) {
+
         if(!notebookRepo.existsById(id)) {
-            return "redirect:/notebook/main";
+            return "redirect:/notebook/notes";
         }
-        NotebookEntry entry=notebookRepo.findById(id).orElseThrow();
-        entry.setTitle(title);
-        entry.setContent(content);
-        entry.setDateOfCreation(new Date());
-        notebookRepo.save(entry);
+
+        UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
+
+        if (!user.getId().equals(notebookRepo.findById(id).get().getUser().getId())) {
+            return "redirect:/notebook/notes";
+        }
+
+        if (bindingResult.hasErrors()) {
+            return "/notebook/editnote";
+        }
+
+        NotebookEntry updatedEntry=notebookRepo.findById(id).orElseThrow();
+        updatedEntry.setTitle(entry.getTitle());
+
+        if(entry.getContent().isEmpty() || entry.getContent().isBlank()) {
+            updatedEntry.setContent("no content");
+        } else {
+            updatedEntry.setContent(entry.getContent());
+        }
+        updatedEntry.setDateOfCreation(new Date());
+        notebookRepo.save(updatedEntry);
+
         return "redirect:/notebook/notes";
     }
 
 
-    @GetMapping("/{id}/remove")
+    @PostMapping("/{id}/remove")
+    @PreAuthorize("hasAnyAuthority('permission:writenotes', 'permission:read', 'permission:write')")
     public String removeNoteById (@PathVariable(value="id") Long id) {
+
+        if(!notebookRepo.existsById(id)) {
+            return "redirect:/notebook/notes";
+        }
+
+        UserDetails userDetails=(UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user= userRepo.findByFirstname(userDetails.getUsername()).orElseThrow();
+
+        if (!user.getId().equals(notebookRepo.findById(id).get().getUser().getId())) {
+            return "redirect:/notebook/notes";
+        }
+
         notebookRepo.deleteById(id);
         return "redirect:/notebook/notes";
     }

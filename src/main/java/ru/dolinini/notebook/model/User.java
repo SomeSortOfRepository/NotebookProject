@@ -5,6 +5,7 @@ import ru.dolinini.notebook.security.Role;
 import ru.dolinini.notebook.security.Status;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,15 +21,32 @@ public class User {
     private Set<NotebookEntry> notes=new HashSet<>();
 
     @Column(name = "firstname")
+    @NotNull
+    @NotEmpty(message = "Can't be empty")
+    @NotBlank(message = "Can't be only blank space")
+    @Pattern(regexp = "^[a-zA-Z]+[a-zA-Z0-9]*$", message = "The first character can't be a digit, can't contain spaces")
+    @Size(min = 2, max = 20, message = "Name should be between 2 and 20 characters")
     private String firstname;
 
     @Column(name = "lastname")
+    @NotNull(message="can't be null or empty")
+    @Size(min = 2, max = 20, message = "Lastname should be between 2 and 20 characters")
+    @Pattern(regexp = "^[a-zA-Z]+[a-zA-Z0-9]*$", message = "The first character can't be a digit, can't contain spaces")
     private String lastname;
 
     @Column(name = "password")
+    @NotNull
+    @NotEmpty(message = "Can't be empty")
+    @NotBlank(message = "Can't be only blank space")
+    @Pattern(regexp = "^\\S*$", message = "Can't contain spaces")
+    @Size(min = 1, max = 61, message = "Should be between 1 and 61 characters")
     private String password;
 
     @Column(name = "email")
+    @NotNull
+    @NotEmpty(message = "Can't be empty")
+    @NotBlank(message = "Can't contain blank space")
+    @Email(message = "email not valid")
     private String email;
 
     @Column(name = "role")

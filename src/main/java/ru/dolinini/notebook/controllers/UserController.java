@@ -1,10 +1,12 @@
 package ru.dolinini.notebook.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.dolinini.notebook.model.NotebookEntry;
 import ru.dolinini.notebook.model.User;
@@ -12,6 +14,7 @@ import ru.dolinini.notebook.repos.UserRepo;
 import ru.dolinini.notebook.security.Role;
 import ru.dolinini.notebook.security.Status;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,14 +29,15 @@ public class UserController {
         this.userRepo = userRepo;
     }
 
-    @GetMapping("/{id}")
-    public String findUserById (@PathVariable Long id, Model model) {
-        Optional<User> userOptional=userRepo.findById(id);
-        User user=userOptional.get();
-        return "/user/userpage";
-    }
+//    @GetMapping("/{id}")
+//    public String findUserById (@PathVariable Long id, Model model) {
+//        Optional<User> userOptional=userRepo.findById(id);
+//        User user=userOptional.get();
+//        return "/user/userpage";
+//    }
 
     @GetMapping()
+    @PreAuthorize("hasAuthority('permission:read')")
     public String allUsers(Model model) {
         List<User> userList=userRepo.findAll();
         model.addAttribute("users", userList);
@@ -64,30 +68,43 @@ public class UserController {
 //    }
 
     @GetMapping("{id}/edit")
+    @PreAuthorize("hasAuthority('permission:write')")
     public String editUser(@PathVariable(value = "id") Long id, Model model) {
         if(!userRepo.existsById(id)) {
             return "redirect:/users";
         }
-        User user=userRepo.findById(id).orElseThrow();
-        model.addAttribute("user", user);
+        User usr=userRepo.findById(id).orElseThrow();
+        model.addAttribute("user", usr);
         return "/user/edituser";
     }
 
     @PostMapping("{id}/edit")
-    public String postEditedUser(@PathVariable(value = "id") Long id,
-                                 @RequestParam String lastname,
-                                 @RequestParam String email, Model model) {
+    @PreAuthorize("hasAuthority('permission:write')")
+    public String postEditedUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult, @PathVariable(value = "id") Long id, Model model) {
         if(!userRepo.existsById(id)) {
-            return "redirect:/users/main";
+            return "redirect:/users";
         }
-        User user=userRepo.findById(id).orElseThrow();
-        user.setLastname(lastname);
-        user.setEmail(email);
-        userRepo.save(user);
+        if (bindingResult.hasErrors()) {
+            return "/user/edituser";
+        }
+        User updatedUser=userRepo.findById(id).orElseThrow();
+        if(userRepo.existsByFirstname(user.getFirstname()) & !updatedUser.getFirstname().equals(user.getFirstname())) {
+            String warning="Error, user with such name already exists";
+            model.addAttribute("warning", warning);
+            return "/user/edituser";
+        }
+        updatedUser.setFirstname(user.getFirstname());
+        updatedUser.setLastname(user.getLastname());
+        if (!updatedUser.getPassword().equals(user.getPassword())) {
+            updatedUser.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        }
+        updatedUser.setEmail(user.getEmail());
+        userRepo.save(updatedUser);
         return "redirect:/users";
     }
 
-    @GetMapping("{id}/remove")
+    @PostMapping("{id}/remove")
+    @PreAuthorize("hasAuthority('permission:write')")
     public String removeUser(@PathVariable(value = "id") Long id) {
         userRepo.deleteById(id);
         return "redirect:/users";

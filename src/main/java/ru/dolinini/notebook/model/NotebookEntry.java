@@ -3,6 +3,7 @@ package ru.dolinini.notebook.model;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.Date;
 import java.util.Objects;
 
@@ -16,9 +17,14 @@ public class NotebookEntry {
     private Long id;
 
     @Column(name = "title")
+    @NotNull
+    @NotEmpty(message = "Title can't be empty")
+    @NotBlank(message = "Title can't contain only blank space")
+    @Size(min = 1, max = 90, message = "Title size can be between 1 and 90 characters")
     private String title;
 
     @Column(name = "content")
+    @Size(max = 1000, message = "Note content can't be more then 1000 characters")
     private String content;
 
     @Column(name = "dateofcreation")
